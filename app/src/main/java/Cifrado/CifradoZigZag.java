@@ -205,6 +205,25 @@ public class CifradoZigZag extends AppCompatActivity {
                 contador++;
             }
         }
+        
+        stringBuilder=new StringBuilder();
+
+        for(int i=0;i<NoOlas;++i){
+            stringBuilder.append(String.valueOf(texto.charAt(i)));
+            for(int columna=0;columna<niveles-2;++columna) {
+                //matriz[0+(2*i)][columna] = String.valueOf(texto.charAt(contador));
+                stringBuilder.append(matriz[0 + (2 * i)][columna]);
+            }
+            stringBuilder.append(String.valueOf(texto.charAt(texto.length()-(NoOlas-i))));
+
+            for(int columna=niveles-3;columna>=0;--columna) {
+
+                //matriz[1+(2*i)][columna] = String.valueOf(texto.charAt(contador));
+                stringBuilder.append(matriz[1 + (2 * i)][columna]);
+            }
+        }
+
+        String textodescifrado=stringBuilder.toString();
 
     }
 }
