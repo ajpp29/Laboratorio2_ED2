@@ -59,6 +59,20 @@ public class CifradoZigZag extends AppCompatActivity {
                 try {
                     int keyzigzag=Integer.parseInt(KeyCifrado.getText().toString());
                     Cifrar(text, keyzigzag);
+                    KeyCifrado.setText("");
+                }catch (Exception e){
+
+                }
+            }
+        });
+
+        Descifrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    int keyzigzag=Integer.parseInt(KeyCifrado.getText().toString());
+                    Descifrar(text, keyzigzag);
+                    KeyCifrado.setText("");
                 }catch (Exception e){
 
                 }
@@ -108,7 +122,7 @@ public class CifradoZigZag extends AppCompatActivity {
     }
 
     public void Cifrar(String cadena, int keyzigzag){
-        Toast.makeText(this,String.valueOf(cadena.length()),Toast.LENGTH_LONG).show();
+        //Toast.makeText(this,String.valueOf(cadena.length()),Toast.LENGTH_LONG).show();
         //Toast.makeText(this,String.valueOf(keyzigzag),Toast.LENGTH_LONG).show();
         StringBuilder stringBuilder=new StringBuilder();
         String texto;
@@ -161,5 +175,36 @@ public class CifradoZigZag extends AppCompatActivity {
         }
 
         String textocifrado=stringBuilder.toString();
+    }
+
+    public void Descifrar(String cadena, int keyzigzag){
+        StringBuilder stringBuilder=new StringBuilder();
+        String texto;
+
+        int niveles=keyzigzag;
+        int tamanioOla=(niveles*2)-2;
+        double division=(double) cadena.length()/tamanioOla;
+        int NoOlas= (int) Math.ceil(division);
+        int letrasFaltantes=(NoOlas*tamanioOla)-cadena.length();
+        int tamanioBloque=2*NoOlas;
+
+        stringBuilder.append(cadena);
+
+        for(int i=0;i<letrasFaltantes;++i){
+            stringBuilder.append(" ");
+        }
+        texto=stringBuilder.toString();
+
+        String[][] matriz=new String[tamanioBloque][niveles-2];
+
+        int contador=NoOlas;
+
+        for(int columna=0;columna<niveles-2;++columna){
+            for(int fila=0;fila<tamanioBloque;++fila){
+                matriz[fila][columna]=String.valueOf(texto.charAt(contador));
+                contador++;
+            }
+        }
+
     }
 }
