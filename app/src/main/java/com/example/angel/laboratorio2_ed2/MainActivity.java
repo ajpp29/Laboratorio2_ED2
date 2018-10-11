@@ -9,13 +9,21 @@ import Cifrado.CifradoZigZag;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button CifrarZigZag;
+    Button ShowZigZag;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CifrarZigZag=(Button) findViewById(R.id.CifrarZigZag);
+        ShowZigZag=(Button) findViewById(R.id.CifrarZigZag);
+
+        ShowZigZag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent zigzag =new Intent(getApplicationContext(),CifradoZigZag.class);
+                startActivity(zigzag);
+            }
+        });
 
 
     }
