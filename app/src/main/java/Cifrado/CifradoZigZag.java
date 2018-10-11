@@ -12,10 +12,17 @@ import android.widget.Toast;
 
 import com.example.angel.laboratorio2_ed2.R;
 
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class CifradoZigZag extends AppCompatActivity {
 
@@ -26,6 +33,7 @@ public class CifradoZigZag extends AppCompatActivity {
     TextView Ruta,Panel,PanelComprimido;
     EditText KeyCifrado;
     String error;
+    String pathdestino =  "/storage/emulated/0/";
     Uri FileUri;
 
 
@@ -39,6 +47,7 @@ public class CifradoZigZag extends AppCompatActivity {
         Cifrar=(Button) findViewById(R.id.Cifzigzag);
         Descifrar=(Button) findViewById(R.id.Descifzigzag);
         KeyCifrado=(EditText) findViewById(R.id.keyzigzag);
+        Panel=(EditText) findViewById(R.id.TextoDescifrado);
 
         OpenFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,7 +184,32 @@ public class CifradoZigZag extends AppCompatActivity {
         }
 
         String textocifrado=stringBuilder.toString();
+        Toast.makeText(this,textocifrado,Toast.LENGTH_LONG).show();
+
+
+
+        try {
+
+            File file = new File(FileUri.getPath());
+            String nombreArchivo = file.getName().replace('.','_');
+            File newfile=new File(pathdestino,nombreArchivo+".cif");
+            if(!newfile.exists()){
+                newfile.createNewFile();
+            }
+
+            FileOutputStream fileOutputStream = new FileOutputStream(newfile);
+            OutputStreamWriter writeArchivo=new OutputStreamWriter(fileOutputStream);
+            BufferedWriter bufferedWriter=new BufferedWriter(writeArchivo);
+            bufferedWriter.write(textocifrado);
+            bufferedWriter.flush();
+            bufferedWriter.close();
+
+        }catch(IOException e){
+
+        }
     }
+
+
 
     public void Descifrar(String cadena, int keyzigzag){
         StringBuilder stringBuilder=new StringBuilder();
@@ -205,7 +239,7 @@ public class CifradoZigZag extends AppCompatActivity {
                 contador++;
             }
         }
-        
+
         stringBuilder=new StringBuilder();
 
         for(int i=0;i<NoOlas;++i){
@@ -224,6 +258,8 @@ public class CifradoZigZag extends AppCompatActivity {
         }
 
         String textodescifrado=stringBuilder.toString();
+        Toast.makeText(this,textodescifrado,Toast.LENGTH_LONG).show();
+        Panel.setText(textodescifrado);
 
     }
 }

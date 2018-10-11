@@ -9,7 +9,7 @@
         android:id="@+id/DocumentoCifZigZag"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Documento a Cifrar"
+        android:text="Documento a cargar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.924"
@@ -80,4 +80,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.298" />
+
+    <EditText
+        android:id="@+id/TextoDescifrado"
+        android:layout_width="297dp"
+        android:layout_height="200dp"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.637" />
 </android.support.constraint.ConstraintLayout>
