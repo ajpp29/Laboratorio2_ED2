@@ -90,4 +90,8 @@ public class CifradoSDES extends AppCompatActivity {
 
         return stringBuilder.toString();
     }
+
+    public void Cifrar(Character character){
+        
+    }
 }

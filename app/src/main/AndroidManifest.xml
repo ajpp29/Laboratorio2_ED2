@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name="Cifrado.CifradoZigZag"/>
+        <activity android:name="Cifrado.CifradoSDES"/>
     </application>
 
 </manifest>

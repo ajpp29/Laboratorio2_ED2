@@ -209,8 +209,6 @@ public class CifradoZigZag extends AppCompatActivity {
         }
     }
 
-
-
     public void Descifrar(String cadena, int keyzigzag){
         StringBuilder stringBuilder=new StringBuilder();
         String texto;
