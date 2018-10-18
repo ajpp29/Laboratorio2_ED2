@@ -25,6 +25,7 @@
         </activity>
         <activity android:name="Cifrado.CifradoZigZag"/>
         <activity android:name="Cifrado.CifradoSDES"/>
+        <activity android:name="Cifrado.CifradoRSA"/>
     </application>
 
 </manifest>
