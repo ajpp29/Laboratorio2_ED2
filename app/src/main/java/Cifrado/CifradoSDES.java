@@ -13,9 +13,13 @@ import android.widget.Toast;
 import com.example.angel.laboratorio2_ed2.R;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 
 public class CifradoSDES extends AppCompatActivity {
@@ -29,7 +33,7 @@ public class CifradoSDES extends AppCompatActivity {
     int[] key1,key2;
     String[][] matrizS0,matrizS1;
     //String error;
-    //String pathdestino =  "/storage/emulated/0/";
+    String pathdestino =  "/storage/emulated/0/";
     Uri FileUri;
 
 
@@ -42,6 +46,8 @@ public class CifradoSDES extends AppCompatActivity {
         Ruta=(TextView) findViewById(R.id.rutaArchSDes);
         KeyCifrado=(EditText) findViewById(R.id.keySDes);
         Cifrar=(Button) findViewById(R.id.cifSDes);
+        Descifrar=(Button) findViewById(R.id.descifSDes);
+        Panel=(EditText) findViewById(R.id.TextoDescifradoSDes);
 
         OpenFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +79,36 @@ public class CifradoSDES extends AppCompatActivity {
                 //////////////
                 try{
                     Cifrar(text,key1,key2);
+                    KeyCifrado.setText("");
+                    Ruta.setText("");
+                }
+                catch (Exception e){
+                    Toast.makeText(getApplicationContext(),"Verifique que el archivo no este corrupto",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        Descifrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    String primarikey=KeyCifrado.getText().toString();
+                    int[] prikey=new int[10];
+
+                    for(int i=0;i<10;++i){
+                        prikey[i]=Integer.parseInt(String.valueOf(primarikey.charAt(i)));
+                    }
+                    LlenarMatrizes();
+                    GenerarLlaves(prikey);
+                }
+                catch (Exception e){
+                    Toast.makeText(getApplicationContext(),"Debe ingresar un numero de 10 digitos",Toast.LENGTH_LONG).show();
+                }
+                //////////////
+                try{
+                    Panel.setText(Descifrar(text,key2,key1));
+                    KeyCifrado.setText("");
+                    Ruta.setText("");
                 }
                 catch (Exception e){
                     Toast.makeText(getApplicationContext(),"Verifique que el archivo no este corrupto",Toast.LENGTH_LONG).show();
@@ -326,6 +362,7 @@ public class CifradoSDES extends AppCompatActivity {
 
         return resultado;
     }
+
     private int ReturnValue(int n1,int n2){
         int resultado=0;
         if(n1==0&n2==0)
@@ -338,6 +375,15 @@ public class CifradoSDES extends AppCompatActivity {
             resultado=3;
 
         return resultado;
+    }
+
+    private int[] DarFormato(int[] cadena){
+        int[] newcadena= new int[8];
+
+        for(int i=0;i<newcadena.length;++i){
+            newcadena[i]=cadena[cadena.length-(newcadena.length-i)];
+        }
+        return newcadena;
     }
 
 
@@ -363,10 +409,45 @@ public class CifradoSDES extends AppCompatActivity {
         return String.format("%8s",binario).replace(' ','0');
     }
 
+    public static int binaryToDecimal(int number) {
+        int decimal = 0;
+        int binary = number;
+        int power = 0;
+
+        while (binary != 0) {
+            int lastDigit = binary % 10;
+            decimal += lastDigit * Math.pow(2, power);
+            power++;
+            binary = binary / 10;
+        }
+        return decimal;
+    }
+
     /**
      *Funciones para Cifrar
      */
 
+    private void WriteText(String caractercifrado){
+        try {
+
+            File file = new File(FileUri.getPath());
+            String nombreArchivo = file.getName().replace('.','_');
+            File newfile=new File(pathdestino,nombreArchivo+".scif");
+            if(!newfile.exists()){
+                newfile.createNewFile();
+            }
+
+            FileOutputStream fileOutputStream = new FileOutputStream(newfile);
+            OutputStreamWriter writeArchivo=new OutputStreamWriter(fileOutputStream);
+            BufferedWriter bufferedWriter=new BufferedWriter(writeArchivo);
+            bufferedWriter.append(caractercifrado);
+            bufferedWriter.flush();
+            bufferedWriter.close();
+
+        }catch(IOException e){
+
+        }
+    }
 
     public void Cifrar(String texto,int[] k1,int[] k2){
         for(int i=0;i<texto.length();++i){
@@ -375,10 +456,39 @@ public class CifradoSDES extends AppCompatActivity {
             for(int j=0;j<CaracterBinario.length();++j){
                 CharBinario[j]=Integer.parseInt(String.valueOf(CaracterBinario.charAt(j)));
             }
-            SDes(CharBinario,k1,k2);
+            if(CharBinario.length>8)
+                CharBinario=DarFormato(CharBinario);
+            
+            String binario=SDes(CharBinario,k1,k2);
+            int decimal=binaryToDecimal(Integer.parseInt(binario));
+            String caractercif=String.valueOf(Character.toChars(decimal));
+            WriteText(caractercif);
         }
     }
-    public void SDes(int[] charbinario,int[] k1,int[] k2){
+
+    public String Descifrar(String texto,int[] k1, int[] k2){
+        StringBuilder textodescifrado=new StringBuilder();
+
+        for(int i=0;i<texto.length();++i){
+            String CaracterBinario = ConvertToBinary(String.valueOf(texto.charAt(i)));
+            int[] CharBinario= new int[CaracterBinario.length()];
+            for(int j=0;j<CaracterBinario.length();++j){
+                CharBinario[j]=Integer.parseInt(String.valueOf(CaracterBinario.charAt(j)));
+            }
+            if(CharBinario.length>8)
+                CharBinario=DarFormato(CharBinario);
+
+
+            String binario=SDes(CharBinario,k1,k2);
+            int decimal=binaryToDecimal(Integer.parseInt(binario));
+            String caracterdescif=String.valueOf(Character.toChars(decimal));
+            textodescifrado.append(caracterdescif);
+        }
+
+        return textodescifrado.toString();
+    }
+
+    public String SDes(int[] charbinario,int[] k1,int[] k2){
         int[] Partleft =new int[charbinario.length/2];
         int[] PartRight =new int[charbinario.length/2];
 
@@ -474,6 +584,14 @@ public class CifradoSDES extends AppCompatActivity {
 
         //Paso 10: Aplicar el inverso de la permutacion inicial
         charbinario=PermutacionInicial(charbinario,1);
+
+        StringBuilder binario=new StringBuilder();
+
+        for(int i=0;i<charbinario.length;++i){
+            binario.append(charbinario[i]);
+        }
+
+        return binario.toString();
 
     }
 
