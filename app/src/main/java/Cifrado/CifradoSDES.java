@@ -27,6 +27,7 @@ public class CifradoSDES extends AppCompatActivity {
     TextView Ruta,Panel,PanelComprimido;
     EditText KeyCifrado;
     int[] key1,key2;
+    String[][] matrizS0,matrizS1;
     //String error;
     //String pathdestino =  "/storage/emulated/0/";
     Uri FileUri;
@@ -63,12 +64,13 @@ public class CifradoSDES extends AppCompatActivity {
                     for(int i=0;i<10;++i){
                         prikey[i]=Integer.parseInt(String.valueOf(primarikey.charAt(i)));
                     }
+                    LlenarMatrizes();
                     GenerarLlaves(prikey);
                 }
                 catch (Exception e){
                     Toast.makeText(getApplicationContext(),"Debe ingresar un numero de 10 digitos",Toast.LENGTH_LONG).show();
                 }
-
+                //////////////
                 try{
                     Cifrar(text,key1,key2);
                 }
@@ -125,8 +127,8 @@ public class CifradoSDES extends AppCompatActivity {
      */
 
     private void GenerarLlaves(int[] llave){
-        int[] mediallaveizquierda =new int[5];
-        int[] mediallavederecha =new int[5];
+        int[] mediallaveizquierda =new int[llave.length/2];
+        int[] mediallavederecha =new int[llave.length/2];
 
         //Paso 0 : permutación 10 de la llave
         llave=Permutacion10(llave);
@@ -215,7 +217,7 @@ public class CifradoSDES extends AppCompatActivity {
 
     private int[] Permutacion8(int[] key){
         //Original: 1,2,3,4,5,6,7,8,9,10
-        //Permutacion: 2,4,6,8,10,1,3,5,7,9
+        //Permutacion: 1,2,5,6,9,10,3,4
 
         int[] original=new int[]{0,1,2,3,4,5,6,7,8,9};
         int[] permutacion=new int[]{0,1,4,5,8,9,2,3};
@@ -228,7 +230,116 @@ public class CifradoSDES extends AppCompatActivity {
 
         return newkey;
     }
-    
+
+    private int[] PermutacionInicial(int[] key,int orden){
+        //Original: 1,2,3,4,5,6,7,8
+        //Permutacion: 8,5,2,7,4,1,6,3
+
+        int[] original=new int[]{0,1,2,3,4,5,6,7};
+        int[] permutacion=new int[]{7,4,1,6,3,0,5,2};
+
+        int[] newkey=new int[permutacion.length];
+
+        if(orden==0) {
+            for (int i = 0; i < permutacion.length; ++i) {
+                newkey[original[i]] = key[permutacion[i]];
+            }
+        }
+        else if(orden==1){
+            for (int i = 0; i < original.length; ++i) {
+                newkey[permutacion[i]] = key[original[i]];
+            }
+        }
+
+        return newkey;
+    }
+
+    private int[] PermutacionExpandida(int[] key){
+        //Original: 1,2,3,4
+        //Permutacion: 2,4,3,1,3,4,1,2
+
+        int[] original=new int[]{0,1,2,3};
+        int[] permutacion=new int[]{1,3,2,0,2,3,0,1};
+
+        int[] newkey=new int[permutacion.length];
+
+        for(int i=0;i<original.length;++i){
+            newkey[original[i]]=key[permutacion[i]];
+            newkey[original[i]+(original.length)]=key[permutacion[i+(original.length)]];
+        }
+
+        return newkey;
+    }
+
+    private int[] Permutacion4(int[] key){
+        //Original: 1,2,3,4
+        //Permutacion: 4,1,3,2
+
+        int[] original=new int[]{0,1,2,3,4};
+        int[] permutacion=new int[]{3,0,2,1};
+
+        int[] newkey=new int[permutacion.length];
+
+        for(int i=0;i<permutacion.length;++i){
+            newkey[original[i]]=key[permutacion[i]];
+        }
+
+        return newkey;
+    }
+
+    private int[] Xor(int[] arreglo,int[] key){
+        int[] newresult=new int[key.length];
+
+        for(int i=0;i<key.length;++i){
+            if(arreglo[i]==key[i])
+                newresult[i]=0;
+            else
+                newresult[i]=1;
+        }
+
+        return newresult;
+    }
+
+    private void LlenarMatrizes(){
+        matrizS0= new String[][]{{"01","00","11","10"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
+        matrizS1= new String[][]{{"00","01","10","11"},{"10","00","01","11"},{"11","00","01","00"},{"10","01","00","11"}};
+    }
+
+    private int[] ValoresMatriz(int[] cadena, int noMatriz){
+        int fila=ReturnValue(cadena[0],cadena[3]);
+        int columna=ReturnValue(cadena[1],cadena[2]);
+        String aux;
+
+        int[] resultado=new int[cadena.length/2];
+
+        if(noMatriz==0) {
+            aux = matrizS0[fila][columna];
+            resultado[0]=Integer.parseInt(String.valueOf(String.valueOf(aux).charAt(0)));
+            resultado[1]=Integer.parseInt(String.valueOf(String.valueOf(aux).charAt(1)));
+
+        }
+        else if(noMatriz==1){
+            aux = matrizS1[fila][columna];
+            resultado[0]=Integer.parseInt(String.valueOf(String.valueOf(aux).charAt(0)));
+            resultado[1]=Integer.parseInt(String.valueOf(String.valueOf(aux).charAt(1)));
+        }
+
+        return resultado;
+    }
+    private int ReturnValue(int n1,int n2){
+        int resultado=0;
+        if(n1==0&n2==0)
+            resultado=0;
+        else if(n1==0&n2==1)
+            resultado=1;
+        else if(n1==1&n2==0)
+            resultado=2;
+        else
+            resultado=3;
+
+        return resultado;
+    }
+
 
     /**
      *Convertir a Hexagesimal, Convertir a Binario
@@ -260,10 +371,109 @@ public class CifradoSDES extends AppCompatActivity {
     public void Cifrar(String texto,int[] k1,int[] k2){
         for(int i=0;i<texto.length();++i){
             String CaracterBinario = ConvertToBinary(String.valueOf(texto.charAt(i)));
-            SDes(CaracterBinario,k1,k2);
+            int[] CharBinario= new int[CaracterBinario.length()];
+            for(int j=0;j<CaracterBinario.length();++j){
+                CharBinario[j]=Integer.parseInt(String.valueOf(CaracterBinario.charAt(j)));
+            }
+            SDes(CharBinario,k1,k2);
         }
     }
-    public void SDes(String caracter,int[] k1,int[] k2){
+    public void SDes(int[] charbinario,int[] k1,int[] k2){
+        int[] Partleft =new int[charbinario.length/2];
+        int[] PartRight =new int[charbinario.length/2];
+
+        //Paso 0 : permutación inicial del caracter
+        charbinario=PermutacionInicial(charbinario,0);
+
+        //Paso 1 : separar la llave en bloques de 4
+        for(int i=0;i<charbinario.length;i++){
+            if(i<(charbinario.length/2))
+                Partleft[i]=charbinario[i];
+            else
+                PartRight[i-(charbinario.length/2)]=charbinario[i];
+        }
+
+        //Se crea una copia para trabajar con ellas
+        int[] Copileft=Partleft;
+        int[] CopiRight=PartRight;
+
+        //Paso 2: Expandir y permutar
+        CopiRight=PermutacionExpandida(CopiRight);
+
+        //Paso 3: Hacer un Xor con la llave 1
+        CopiRight=Xor(CopiRight,k1);
+
+        //Paso 4: Separar el resultado en bloques de 4
+        int[] CopiRLeft =new int[CopiRight.length/2];
+        int[] CopiRRight =new int[CopiRight.length/2];
+
+        for(int i=0;i<CopiRight.length;i++){
+            if(i<(CopiRight.length/2))
+                CopiRLeft[i]=CopiRight[i];
+            else
+                CopiRRight[i-(CopiRight.length/2)]=CopiRight[i];
+        }
+
+        //Paso 5: Utilizar las matrices
+        CopiRLeft=ValoresMatriz(CopiRLeft,0);
+        CopiRRight=ValoresMatriz(CopiRRight,1);
+
+        //Paso 6: Unir los bits y hacer P4
+        CopiRight=UnirContrasenia(CopiRLeft,CopiRRight);
+        CopiRight=Permutacion4(CopiRight);
+
+        //Paso 7: Se hace un Xor con el lado izquierdo
+        Partleft=Xor(Copileft,CopiRight);
+
+        //Se Igualan los componenetes
+        Copileft=Partleft;
+        CopiRight=PartRight;
+
+        //Se cambia derecha izquierda
+        Partleft=CopiRight;
+        PartRight=Copileft;
+
+        //Se vuelve a igualar los componentes
+        Copileft=Partleft;
+        CopiRight=PartRight;
+
+        /////////////////////////////////////
+        //SE REPITEN LOS PASOS PRIMARIOS
+        //////////////////////////////////////
+
+        //Paso 2: Expandir y permutar
+        CopiRight=PermutacionExpandida(CopiRight);
+
+        //Paso 3: Hacer un Xor con la llave 2
+        CopiRight=Xor(CopiRight,k2);
+
+        //Paso 4: Separar el resultado en bloques de 4
+        CopiRLeft =new int[CopiRight.length/2];
+        CopiRRight =new int[CopiRight.length/2];
+
+        for(int i=0;i<CopiRight.length;i++){
+            if(i<(CopiRight.length/2))
+                CopiRLeft[i]=CopiRight[i];
+            else
+                CopiRRight[i-(CopiRight.length/2)]=CopiRight[i];
+        }
+
+        //Paso 5: Utilizar las matrices
+        CopiRLeft=ValoresMatriz(CopiRLeft,0);
+        CopiRRight=ValoresMatriz(CopiRRight,1);
+
+        //Paso 6: Unir los bits y hacer P4
+        CopiRight=UnirContrasenia(CopiRLeft,CopiRRight);
+        CopiRight=Permutacion4(CopiRight);
+
+        //Paso 7: Se hace un Xor con el lado izquierdo
+        Partleft=Xor(Copileft,CopiRight);
+
+        //Paso 9: Se juntan ambas partes
+        charbinario=UnirContrasenia(Partleft,PartRight);
+
+        //Paso 10: Aplicar el inverso de la permutacion inicial
+        charbinario=PermutacionInicial(charbinario,1);
 
     }
 
