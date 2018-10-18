@@ -437,7 +437,7 @@ public class CifradoSDES extends AppCompatActivity {
                 newfile.createNewFile();
             }
 
-            FileOutputStream fileOutputStream = new FileOutputStream(newfile);
+            FileOutputStream fileOutputStream = new FileOutputStream(newfile,true);
             OutputStreamWriter writeArchivo=new OutputStreamWriter(fileOutputStream);
             BufferedWriter bufferedWriter=new BufferedWriter(writeArchivo);
             bufferedWriter.append(caractercifrado);
